@@ -7,7 +7,7 @@ try {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  export: "output",
+  output: "export",
   eslint: {
     ignoreDuringBuilds: true,
   },
