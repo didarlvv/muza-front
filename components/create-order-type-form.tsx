@@ -1,32 +1,43 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { orderTypeApi } from "@/lib/api"
-import { useToast } from "@/components/ui/use-toast"
-import { Loader2 } from "lucide-react"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { orderTypeApi } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Название должно быть не менее 2 символов"),
   price: z.number().min(0, "Цена не может быть отрицательной"),
   isActive: z.boolean().default(true),
-})
+});
 
 interface CreateOrderTypeFormProps {
-  restaurantId: number
-  onSuccess: () => void
-  onCancel: () => void
+  restaurantId: number;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export function CreateOrderTypeForm({ restaurantId, onSuccess, onCancel }: CreateOrderTypeFormProps) {
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
+export function CreateOrderTypeForm({
+  restaurantId,
+  onSuccess,
+  onCancel,
+}: CreateOrderTypeFormProps) {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -35,33 +46,33 @@ export function CreateOrderTypeForm({ restaurantId, onSuccess, onCancel }: Creat
       price: 0,
       isActive: true,
     },
-  })
+  });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
       await orderTypeApi.createOrderType({
         ...values,
         restaurantId,
-      })
+      });
 
       toast({
         title: "Успех",
         description: "Тип заказа успешно создан",
-      })
+      });
 
-      onSuccess()
+      onSuccess();
     } catch (error) {
       toast({
         title: "Ошибка",
         description: "Не удалось создать тип заказа",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -108,14 +119,23 @@ export function CreateOrderTypeForm({ restaurantId, onSuccess, onCancel }: Creat
                 <FormLabel className="text-base">Активный</FormLabel>
               </div>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isLoading} />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isLoading}
+                />
               </FormControl>
             </FormItem>
           )}
         />
 
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
             Отмена
           </Button>
           <Button type="submit" disabled={isLoading}>
@@ -125,6 +145,5 @@ export function CreateOrderTypeForm({ restaurantId, onSuccess, onCancel }: Creat
         </div>
       </form>
     </Form>
-  )
+  );
 }
-

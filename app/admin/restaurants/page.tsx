@@ -1,88 +1,127 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { restaurantApi } from "@/lib/api"
-import type { Restaurant, PaginationParams } from "@/types/api"
-import { CreateRestaurantForm } from "@/components/create-restaurant-form"
-import { EditRestaurantForm } from "@/components/edit-restaurant-form"
-import { Loader2, Search, ChevronDown, ChevronUp, Plus, MoreHorizontal } from "lucide-react"
-import { AdminLayout } from "@/components/admin-layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { restaurantApi } from "@/lib/api";
+import type { Restaurant, PaginationParams } from "@/types/api";
+import { CreateRestaurantForm } from "@/components/create-restaurant-form";
+import { EditRestaurantForm } from "@/components/edit-restaurant-form";
+import {
+  Loader2,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  MoreHorizontal,
+} from "lucide-react";
+import { AdminLayout } from "@/components/admin-layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 export default function RestaurantsPage() {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([])
-  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
-  const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
+  const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [params, setParams] = useState<PaginationParams>({
     limit: 20,
     page: 1,
     order_direction: "DESC",
     order_by: "id",
-  })
+  });
 
   const fetchRestaurants = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const data = await restaurantApi.getRestaurants({
         ...params,
         search: searchQuery || undefined,
-      })
-      setRestaurants(data)
+      });
+      setRestaurants(data);
     } catch (error) {
-      console.error("Failed to fetch restaurants:", error)
+      console.error("Failed to fetch restaurants:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchRestaurants()
-  }, [params, searchQuery])
+    fetchRestaurants();
+  }, [params, searchQuery]);
 
   const handleCreateSuccess = () => {
-    setIsCreateDrawerOpen(false)
-    fetchRestaurants()
-  }
+    setIsCreateDrawerOpen(false);
+    fetchRestaurants();
+  };
 
   const handleEditSuccess = () => {
-    setEditingRestaurant(null)
-    fetchRestaurants()
-  }
+    setEditingRestaurant(null);
+    fetchRestaurants();
+  };
 
   const handleSort = (column: string) => {
     setParams((prev) => ({
       ...prev,
       order_by: column,
-      order_direction: prev.order_by === column && prev.order_direction === "DESC" ? "ASC" : "DESC",
-    }))
-  }
+      order_direction:
+        prev.order_by === column && prev.order_direction === "DESC"
+          ? "ASC"
+          : "DESC",
+    }));
+  };
 
   const SortIcon = ({ column }: { column: string }) => {
-    if (params.order_by !== column) return null
-    return params.order_direction === "DESC" ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
-  }
+    if (params.order_by !== column) return null;
+    return params.order_direction === "DESC" ? (
+      <ChevronDown className="w-4 h-4" />
+    ) : (
+      <ChevronUp className="w-4 h-4" />
+    );
+  };
 
   return (
     <AdminLayout>
       <Card className="mb-6 bg-gradient-to-b from-white to-gray-50">
         <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
-          <CardTitle className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Рестораны</CardTitle>
-          <Button onClick={() => setIsCreateDrawerOpen(true)} className="bg-primary hover:bg-primary/90">
+          <CardTitle className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">
+            Рестораны
+          </CardTitle>
+          <Button
+            onClick={() => setIsCreateDrawerOpen(true)}
+            className="bg-primary hover:bg-primary/90"
+          >
             <Plus className="mr-2 h-4 w-4" /> Добавить ресторан
           </Button>
         </CardHeader>
@@ -100,7 +139,9 @@ export default function RestaurantsPage() {
             <div className="flex items-center gap-4">
               <Select
                 value={String(params.limit)}
-                onValueChange={(value) => setParams((prev) => ({ ...prev, limit: Number(value) }))}
+                onValueChange={(value) =>
+                  setParams((prev) => ({ ...prev, limit: Number(value) }))
+                }
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Строк на странице" />
@@ -120,13 +161,19 @@ export default function RestaurantsPage() {
                 <TableHeader>
                   <TableRow className="bg-gray-100">
                     <TableHead>Изображение</TableHead>
-                    <TableHead onClick={() => handleSort("name")} className="cursor-pointer">
+                    <TableHead
+                      onClick={() => handleSort("name")}
+                      className="cursor-pointer"
+                    >
                       <div className="flex items-center">
                         Название
                         <SortIcon column="name" />
                       </div>
                     </TableHead>
-                    <TableHead onClick={() => handleSort("slug")} className="cursor-pointer">
+                    <TableHead
+                      onClick={() => handleSort("slug")}
+                      className="cursor-pointer"
+                    >
                       <div className="flex items-center">
                         Slug
                         <SortIcon column="slug" />
@@ -151,7 +198,10 @@ export default function RestaurantsPage() {
                     </TableRow>
                   ) : (
                     restaurants.map((restaurant) => (
-                      <TableRow key={restaurant.id} className="hover:bg-gray-50">
+                      <TableRow
+                        key={restaurant.id}
+                        className="hover:bg-gray-50"
+                      >
                         <TableCell>
                           <Image
                             src={`http://srv694284.hstgr.cloud:4040/${restaurant.file.path}`}
@@ -161,7 +211,9 @@ export default function RestaurantsPage() {
                             className="rounded-full"
                           />
                         </TableCell>
-                        <TableCell className="font-medium">{restaurant.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {restaurant.name}
+                        </TableCell>
                         <TableCell>{restaurant.slug}</TableCell>
                         <TableCell>{`${restaurant.user.firstName} ${restaurant.user.lastName}`}</TableCell>
                         <TableCell className="text-right">
@@ -174,7 +226,9 @@ export default function RestaurantsPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Действия</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => setEditingRestaurant(restaurant)}>
+                              <DropdownMenuItem
+                                onClick={() => setEditingRestaurant(restaurant)}
+                              >
                                 Редактировать
                               </DropdownMenuItem>
                               {/* Add more actions as needed */}
@@ -193,12 +247,20 @@ export default function RestaurantsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setParams((prev) => ({ ...prev, page: prev.page - 1 }))}
+              onClick={() =>
+                setParams((prev) => ({ ...prev, page: prev.page - 1 }))
+              }
               disabled={params.page === 1}
             >
               Предыдущая
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setParams((prev) => ({ ...prev, page: prev.page + 1 }))}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setParams((prev) => ({ ...prev, page: prev.page + 1 }))
+              }
+            >
               Следующая
             </Button>
           </div>
@@ -212,13 +274,19 @@ export default function RestaurantsPage() {
             <SheetTitle>Добавить ресторан</SheetTitle>
           </SheetHeader>
           <div className="mt-6">
-            <CreateRestaurantForm onSuccess={handleCreateSuccess} onCancel={() => setIsCreateDrawerOpen(false)} />
+            <CreateRestaurantForm
+              onSuccess={handleCreateSuccess}
+              onCancel={() => setIsCreateDrawerOpen(false)}
+            />
           </div>
         </SheetContent>
       </Sheet>
 
       {/* Edit Restaurant Drawer */}
-      <Sheet open={editingRestaurant !== null} onOpenChange={(open) => !open && setEditingRestaurant(null)}>
+      <Sheet
+        open={editingRestaurant !== null}
+        onOpenChange={(open) => !open && setEditingRestaurant(null)}
+      >
         <SheetContent side="right" className="sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>Редактировать ресторан</SheetTitle>
@@ -236,6 +304,5 @@ export default function RestaurantsPage() {
         </SheetContent>
       </Sheet>
     </AdminLayout>
-  )
+  );
 }
-

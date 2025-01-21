@@ -1,20 +1,29 @@
-import React from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAuth } from "@/contexts/AuthContext"
+import React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface RestaurantSelectorProps {
-  onSelect: (restaurantId: number) => void
+  onSelect: (restaurantId: number) => void;
 }
 
 export function RestaurantSelector({ onSelect }: RestaurantSelectorProps) {
-  const { user, selectedRestaurant } = useAuth()
+  const { user, selectedRestaurant } = useAuth();
 
   if (!user || !user.restaurants || user.restaurants.length === 0) {
-    return null
+    return null;
   }
 
   return (
-    <Select onValueChange={(value) => onSelect(Number(value))} value={selectedRestaurant?.id.toString()}>
+    <Select
+      onValueChange={(value) => onSelect(Number(value))}
+      value={selectedRestaurant?.id.toString()}
+    >
       <SelectTrigger className="w-full bg-white border-gray-200 text-sm">
         <SelectValue placeholder="Выберите ресторан" />
       </SelectTrigger>
@@ -26,6 +35,5 @@ export function RestaurantSelector({ onSelect }: RestaurantSelectorProps) {
         ))}
       </SelectContent>
     </Select>
-  )
+  );
 }
-

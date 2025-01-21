@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface MainNavProps {
-  isAdmin?: boolean
-  className?: string
+  isAdmin?: boolean;
+  className?: string;
 }
 
 export function MainNav({ isAdmin, className }: MainNavProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const isActive = (href: string) => {
     if (href === "/restaurant/orders/new") {
-      return pathname === href
+      return pathname === href;
     }
-    return pathname?.startsWith(href)
-  }
+    return pathname?.startsWith(href);
+  };
 
   const adminLinks = [
     {
@@ -28,7 +28,7 @@ export function MainNav({ isAdmin, className }: MainNavProps) {
       title: "Рестораны",
       href: "/admin/restaurants",
     },
-  ]
+  ];
 
   const restaurantLinks = [
     {
@@ -48,9 +48,9 @@ export function MainNav({ isAdmin, className }: MainNavProps) {
       href: "/restaurant/orders/new",
       exact: true,
     },
-  ]
+  ];
 
-  const links = isAdmin ? adminLinks : restaurantLinks
+  const links = isAdmin ? adminLinks : restaurantLinks;
 
   return (
     <nav className={cn("flex", className)}>
@@ -60,14 +60,17 @@ export function MainNav({ isAdmin, className }: MainNavProps) {
           href={link.href}
           className={cn(
             "flex items-center text-sm font-medium transition-colors",
-            isActive(link.href) ? "text-primary font-semibold border-b-2 border-primary pb-1" : "text-muted-foreground",
-            className?.includes("flex-col") ? "justify-center h-12 w-full" : "px-4 py-2",
+            isActive(link.href)
+              ? "text-primary font-semibold border-b-2 border-primary pb-1"
+              : "text-muted-foreground",
+            className?.includes("flex-col")
+              ? "justify-center h-12 w-full"
+              : "px-4 py-2"
           )}
         >
           {link.title}
         </Link>
       ))}
     </nav>
-  )
+  );
 }
-

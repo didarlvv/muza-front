@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useCallback } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect, useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,32 +12,32 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from "@/components/ui/form";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Input } from '@/components/ui/input'
-import { restaurantApi, userApi } from '@/lib/api'
-import { useToast } from '@/components/ui/use-toast'
-import { Loader2, Check, ChevronsUpDown } from 'lucide-react'
-import { User, Restaurant } from '@/types/api'
-import { cn } from "@/lib/utils"
-import Image from 'next/image'
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { restaurantApi, userApi } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2, Check, ChevronsUpDown } from "lucide-react";
+import { User, Restaurant } from "@/types/api";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const formSchema = z.object({
-  name: z.string().min(2, 'Название должно быть не менее 2 символов'),
+  name: z.string().min(2, "Название должно быть не менее 2 символов"),
   image: z.any().optional(),
-  userId: z.string().min(1, 'Необходимо выбрать пользователя'),
-})
+  userId: z.string().min(1, "Необходимо выбрать пользователя"),
+});
 
 interface EditRestaurantFormProps {
   restaurantId: number;
@@ -46,16 +46,21 @@ interface EditRestaurantFormProps {
   onCancel: () => void;
 }
 
-export function EditRestaurantForm({ restaurantId, initialData, onSuccess, onCancel }: EditRestaurantFormProps) {
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
-  const [users, setUsers] = useState<User[]>([])
-  const [open, setOpen] = useState(false)
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true)
+export function EditRestaurantForm({
+  restaurantId,
+  initialData,
+  onSuccess,
+  onCancel,
+}: EditRestaurantFormProps) {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [open, setOpen] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [originalData, setOriginalData] = useState({
     name: initialData.name,
     userId: initialData.user.id.toString(),
-  })
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,98 +68,101 @@ export function EditRestaurantForm({ restaurantId, initialData, onSuccess, onCan
       name: initialData.name,
       userId: initialData.user.id.toString(),
     },
-  })
+  });
 
   useEffect(() => {
     const fetchUsers = async () => {
-      setIsLoadingUsers(true)
+      setIsLoadingUsers(true);
       try {
-        const data = await userApi.getUsers()
-        setUsers(Array.isArray(data) ? data : [])
+        const data = await userApi.getUsers();
+        setUsers(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error('Failed to fetch users:', error)
+        console.error("Failed to fetch users:", error);
         toast({
-          title: 'Ошибка',
-          description: 'Не удалось загрузить список пользователей',
-          variant: 'destructive',
-        })
-        setUsers([])
+          title: "Ошибка",
+          description: "Не удалось загрузить список пользователей",
+          variant: "destructive",
+        });
+        setUsers([]);
       } finally {
-        setIsLoadingUsers(false)
+        setIsLoadingUsers(false);
       }
-    }
-    fetchUsers()
-  }, [toast])
+    };
+    fetchUsers();
+  }, [toast]);
 
-  const hasChanges = useCallback((values: z.infer<typeof formSchema>) => {
-    const changes: Record<string, any> = {};
-    
-    if (values.name !== originalData.name) {
-      changes.name = values.name;
-    }
-    
-    if (values.userId !== originalData.userId) {
-      changes.userId = parseInt(values.userId);
-    }
-    
-    if (values.image) {
-      changes.hasNewImage = true;
-    }
-    
-    return Object.keys(changes).length > 0 ? changes : null;
-  }, [originalData])
+  const hasChanges = useCallback(
+    (values: z.infer<typeof formSchema>) => {
+      const changes: Record<string, any> = {};
+
+      if (values.name !== originalData.name) {
+        changes.name = values.name;
+      }
+
+      if (values.userId !== originalData.userId) {
+        changes.userId = parseInt(values.userId);
+      }
+
+      if (values.image) {
+        changes.hasNewImage = true;
+      }
+
+      return Object.keys(changes).length > 0 ? changes : null;
+    },
+    [originalData]
+  );
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const changes = hasChanges(values);
-    
+
     if (!changes) {
       toast({
-        title: 'Информация',
-        description: 'Нет изменений для сохранения',
-      })
+        title: "Информация",
+        description: "Нет изменений для сохранения",
+      });
       return;
     }
 
     try {
-      setIsLoading(true)
-      
+      setIsLoading(true);
+
       const updateData: any = {};
-      
+
       if (changes.name) {
         updateData.name = values.name;
         updateData.slug = values.name
           .toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^\w\-]+/g, '');
+          .replace(/\s+/g, "-")
+          .replace(/[^\w\-]+/g, "");
       }
-      
+
       if (changes.userId) {
         updateData.userId = changes.userId;
       }
-      
+
       if (values.image) {
-        const fileData = await restaurantApi.uploadFile(values.image)
+        const fileData = await restaurantApi.uploadFile(values.image);
         updateData.file = fileData;
       }
-      
-      await restaurantApi.updateRestaurant(restaurantId, updateData)
+
+      await restaurantApi.updateRestaurant(restaurantId, updateData);
 
       toast({
-        title: 'Успех',
-        description: 'Ресторан успешно обновлен',
-      })
-      
-      onSuccess()
+        title: "Успех",
+        description: "Ресторан успешно обновлен",
+      });
+
+      onSuccess();
     } catch (error) {
       toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить ресторан',
-        variant: 'destructive',
-      })
+        title: "Ошибка",
+        description: "Не удалось обновить ресторан",
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -193,9 +201,21 @@ export function EditRestaurantForm({ restaurantId, initialData, onSuccess, onCan
                       disabled={isLoadingUsers}
                     >
                       {field.value
-                        ? users.find((user) => user.id.toString() === field.value)
-                          ? `${users.find((user) => user.id.toString() === field.value)?.firstName} ${users.find((user) => user.id.toString() === field.value)?.lastName}`
-                          : initialData.user.firstName + ' ' + initialData.user.lastName
+                        ? users.find(
+                            (user) => user.id.toString() === field.value
+                          )
+                          ? `${
+                              users.find(
+                                (user) => user.id.toString() === field.value
+                              )?.firstName
+                            } ${
+                              users.find(
+                                (user) => user.id.toString() === field.value
+                              )?.lastName
+                            }`
+                          : initialData.user.firstName +
+                            " " +
+                            initialData.user.lastName
                         : "Выберите администратора"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -217,8 +237,8 @@ export function EditRestaurantForm({ restaurantId, initialData, onSuccess, onCan
                             value={user.id.toString()}
                             key={user.id}
                             onSelect={() => {
-                              form.setValue("userId", user.id.toString())
-                              setOpen(false)
+                              form.setValue("userId", user.id.toString());
+                              setOpen(false);
                             }}
                           >
                             <Check
@@ -233,7 +253,9 @@ export function EditRestaurantForm({ restaurantId, initialData, onSuccess, onCan
                           </CommandItem>
                         ))
                       ) : (
-                        <CommandItem disabled>Нет доступных пользователей</CommandItem>
+                        <CommandItem disabled>
+                          Нет доступных пользователей
+                        </CommandItem>
                       )}
                     </CommandGroup>
                   </Command>
@@ -259,7 +281,9 @@ export function EditRestaurantForm({ restaurantId, initialData, onSuccess, onCan
                     height={50}
                     className="rounded-full"
                   />
-                  <p className="text-sm text-muted-foreground">Текущее изображение</p>
+                  <p className="text-sm text-muted-foreground">
+                    Текущее изображение
+                  </p>
                 </div>
                 <FormControl>
                   <Input
@@ -267,9 +291,9 @@ export function EditRestaurantForm({ restaurantId, initialData, onSuccess, onCan
                     accept="image/*"
                     disabled={isLoading}
                     onChange={(e) => {
-                      const file = e.target.files?.[0]
+                      const file = e.target.files?.[0];
                       if (file) {
-                        onChange(file)
+                        onChange(file);
                       }
                     }}
                     {...field}
@@ -297,6 +321,5 @@ export function EditRestaurantForm({ restaurantId, initialData, onSuccess, onCan
         </div>
       </form>
     </Form>
-  )
+  );
 }
-

@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,78 +12,78 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Input } from '@/components/ui/input'
-import { userApi } from '@/lib/api'
-import { useToast } from '@/components/ui/use-toast'
-import { Loader2 } from 'lucide-react'
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { userApi } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
-  firstName: z.string().min(2, 'Имя должно быть не менее 2 символов'),
-  lastName: z.string().min(2, 'Фамилия должна быть не менее 2 символов'),
-  email: z.string().email('Введите корректный email'),
-  password: z.string().min(6, 'Пароль должен быть не менее 6 символов'),
-  phonenumber: z.string().min(8, 'Введите корректный номер телефона'),
-  validUntil: z.string().min(1, 'Выберите дату'),
-  role: z.string().min(1, 'Выберите роль'),
-  status: z.string().min(1, 'Выберите статус'),
-})
+  firstName: z.string().min(2, "Имя должно быть не менее 2 символов"),
+  lastName: z.string().min(2, "Фамилия должна быть не менее 2 символов"),
+  email: z.string().email("Введите корректный email"),
+  password: z.string().min(6, "Пароль должен быть не менее 6 символов"),
+  phonenumber: z.string().min(8, "Введите корректный номер телефона"),
+  validUntil: z.string().min(1, "Выберите дату"),
+  role: z.string().min(1, "Выберите роль"),
+  status: z.string().min(1, "Выберите статус"),
+});
 
 interface CreateUserFormProps {
-  onSuccess: () => void
-  onCancel: () => void
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
 export function CreateUserForm({ onSuccess, onCancel }: CreateUserFormProps) {
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      phonenumber: '',
-      validUntil: '',
-      role: '',
-      status: 'active',
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      phonenumber: "",
+      validUntil: "",
+      role: "",
+      status: "active",
     },
-  })
+  });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      setIsLoading(true)
-      
+      setIsLoading(true);
+
       await userApi.createUser({
         ...values,
         phonenumber: parseInt(values.phonenumber),
-      })
+      });
 
       toast({
-        title: 'Успех',
-        description: 'Пользователь успешно создан',
-      })
-      
-      onSuccess()
+        title: "Успех",
+        description: "Пользователь успешно создан",
+      });
+
+      onSuccess();
     } catch (error) {
       toast({
-        title: 'Ошибка',
-        description: 'Не удалось создать пользователя',
-        variant: 'destructive',
-      })
+        title: "Ошибка",
+        description: "Не удалось создать пользователя",
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -191,7 +191,9 @@ export function CreateUserForm({ onSuccess, onCancel }: CreateUserFormProps) {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="admin">Администратор</SelectItem>
-                  <SelectItem value="customer">Администратор ресторана</SelectItem>
+                  <SelectItem value="customer">
+                    Администратор ресторана
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -243,6 +245,5 @@ export function CreateUserForm({ onSuccess, onCancel }: CreateUserFormProps) {
         </div>
       </form>
     </Form>
-  )
+  );
 }
-

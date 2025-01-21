@@ -1,11 +1,24 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { RestaurantLayout } from "@/components/restaurant-layout"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect } from "react";
+import { RestaurantLayout } from "@/components/restaurant-layout";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Search,
   Download,
@@ -18,198 +31,250 @@ import {
   User,
   Percent,
   MessageSquare,
-} from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
-import { format, parseISO, addDays } from "date-fns"
-import { ru } from "date-fns/locale"
-import { Badge } from "@/components/ui/badge"
-import { useAuth } from "@/contexts/AuthContext"
-import * as XLSX from "xlsx"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { orderApi, orderTypeApi } from "@/lib/api"
-import type { Order, OrderType } from "@/types/api"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { DateRangePicker } from "@/components/date-range-picker"
-import type { DateRange } from "react-day-picker"
+} from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { format, parseISO, addDays } from "date-fns";
+import { ru } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import * as XLSX from "xlsx";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { orderApi, orderTypeApi } from "@/lib/api";
+import type { Order, OrderType } from "@/types/api";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import CustomDateRangePicker from "@/components/CustomDateRangePicker/CustomDateRangePicker";
+import type { DateRange } from "react-day-picker";
 
 export default function OrderListPage() {
-  const { toast } = useToast()
-  const { selectedRestaurant } = useAuth()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [orderTypes, setOrderTypes] = useState<OrderType[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
+  const { toast } = useToast();
+  const { selectedRestaurant } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: addDays(new Date(), -30),
     to: new Date(),
-  })
+  });
   const [filters, setFilters] = useState({
     order_direction: "DESC" as "ASC" | "DESC",
     status: "all",
     orderTypeId: "all",
     offsite: "all",
-  })
+  });
 
   const fetchOrderTypes = async () => {
-    if (!selectedRestaurant) return
+    if (!selectedRestaurant) return;
     try {
       const data = await orderTypeApi.getOrderTypes({
         restaurantId: selectedRestaurant.id,
-      })
-      setOrderTypes(data)
+      });
+      setOrderTypes(data);
     } catch (error) {
-      console.error("Failed to fetch order types:", error)
+      console.error("Failed to fetch order types:", error);
     }
-  }
+  };
 
   const fetchOrders = async () => {
-    if (!selectedRestaurant) return
-    setIsLoading(true)
+    if (!selectedRestaurant) return;
+    setIsLoading(true);
     try {
       const params: Record<string, any> = {
         order_by: "date",
         order_direction: filters.order_direction,
         restaurantId: selectedRestaurant.id,
-      }
+      };
 
-      if (searchQuery) params.search = searchQuery
-      if (dateRange?.from) params.minDate = format(dateRange.from, "yyyy-MM-dd")
-      if (dateRange?.to) params.maxDate = format(dateRange.to, "yyyy-MM-dd")
-      if (filters.status && filters.status !== "all") params.status = filters.status
+      if (searchQuery) params.search = searchQuery;
+      if (dateRange?.from)
+        params.minDate = format(dateRange.from, "yyyy-MM-dd");
+      if (dateRange?.to) params.maxDate = format(dateRange.to, "yyyy-MM-dd");
+      if (filters.status && filters.status !== "all")
+        params.status = filters.status;
       if (filters.orderTypeId && filters.orderTypeId !== "all")
-        params.orderTypeId = Number.parseInt(filters.orderTypeId)
-      if (filters.offsite && filters.offsite !== "all") params.offsite = filters.offsite === "true"
+        params.orderTypeId = Number.parseInt(filters.orderTypeId);
+      if (filters.offsite && filters.offsite !== "all")
+        params.offsite = filters.offsite === "true";
 
-      const data = await orderApi.getOrders(params)
-      setOrders(data)
+      const data = await orderApi.getOrders(params);
+      setOrders(data);
     } catch (error) {
-      console.error("Failed to fetch orders:", error)
+      console.error("Failed to fetch orders:", error);
       toast({
         title: "Ошибка",
-        description: "Не удалось загрузить заказы. Пожалуйста, попробуйте еще раз.",
+        description:
+          "Не удалось загрузить заказы. Пожалуйста, попробуйте еще раз.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (selectedRestaurant) {
-      fetchOrderTypes()
-      fetchOrders()
+      fetchOrderTypes();
+      fetchOrders();
     }
-  }, [selectedRestaurant, dateRange, filters, searchQuery])
+  }, [selectedRestaurant, dateRange, filters, searchQuery]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "accepted":
-        return "bg-green-500"
+        return "bg-green-500 hover:bg-green-700";
       case "rejected":
-        return "bg-red-500"
+        return "bg-red-500 hover:bg-red-700";
       case "prepayment":
-        return "bg-yellow-500"
+        return "bg-yellow-500 hover:bg-yellow-700";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500 hover:bg-gray-700";
     }
-  }
+  };
 
   const getStatusText = (status: string) => {
     switch (status) {
       case "accepted":
-        return "Принят"
+        return "Принят";
       case "rejected":
-        return "Отклонен"
+        return "Отклонен";
       case "prepayment":
-        return "Предоплата"
+        return "Предоплата";
       default:
-        return status
+        return status;
     }
-  }
+  };
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
       orders.map((order) => {
-        const totalCost = order.price * order.chairCount
-        const discountAmount = totalCost * (order.discount / 100)
-        const finalCost = totalCost - discountAmount
-        const remainingPayment = Math.max(0, finalCost - order.totalPayment)
+        const totalCost = order.price * order.chairCount;
+        const discountAmount = totalCost * (order.discount / 100);
+        const finalCost = totalCost - discountAmount;
+        const remainingPayment = Math.max(0, finalCost - order.totalPayment);
         return {
-          ID: order.id,
           "ФИО клиента": order.fullName,
-          Телефон: order.phonenumber,
-          Дата: format(parseISO(order.date), "d MMMM yyyy", { locale: ru }),
+          Дата: format(parseISO(order.date), "dd.MM.yyyy"),
           "Тип заказа": order.orderTypeName,
-          "Количество гостей": order.chairCount,
+          Место: order.offsite ? "Выездное" : "В ресторане",
+          Гости: order.chairCount,
+          Телефон: order.phonenumber,
           Цена: order.price,
           Скидка: order.discount,
-          "Итоговая сумма": order.totalPayment,
-          "Полная сумма": totalCost,
-          "Статус оплаты": remainingPayment > 0 ? `Осталось оплатить: ${remainingPayment.toFixed(2)} TMT` : "Оплачено",
+          "Общая сумма": finalCost.toFixed(2),
+          "Сумма оплаты": remainingPayment.toFixed(2),
           Статус: getStatusText(order.status),
-          "Выездное мероприятие": order.offsite ? "Да" : "Нет",
-          Примечание: order.note,
-          Комментарий: order.comment,
-          Обновлено: `${order.updatedBy.firstName} ${order.updatedBy.lastName}`,
-        }
-      }),
-    )
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders")
+        };
+      })
+    );
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
 
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
-    const data = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
-    const url = window.URL.createObjectURL(data)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = "orders.xlsx"
-    link.click()
-    window.URL.revokeObjectURL(url)
-  }
+    // Set column widths
+    const columnWidths = [
+      { wch: 20 }, // ФИО клиента
+      { wch: 12 }, // Дата
+      { wch: 15 }, // Тип заказа
+      { wch: 15 }, // Место
+      { wch: 8 }, // Гости
+      { wch: 15 }, // Телефон
+      { wch: 10 }, // Цена
+      { wch: 10 }, // Скидка
+      { wch: 15 }, // Общая сумма
+      { wch: 18 }, // Сумма оплаты
+      { wch: 12 }, // Статус
+    ];
+    worksheet["!cols"] = columnWidths;
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const data = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(data);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "orders.xlsx";
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   if (!selectedRestaurant) {
-    return <div>Пожалуйста, выберите ресторан</div>
+    return <div>Пожалуйста, выберите ресторан</div>;
   }
 
   return (
     <RestaurantLayout>
       <Card className="mb-6 bg-gradient-to-b from-white to-gray-50">
-        <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
-          <CardTitle className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Список заказов</CardTitle>
+        <CardHeader className="flex justify-between items-center px-6">
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            Список заказов
+          </CardTitle>
+          <Button
+            onClick={exportToExcel}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Экспорт в Excel
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-            <div className="col-span-full">
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-                Поиск
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  id="search"
-                  placeholder="Поиск заказов..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+            <div className="col-span-full sm:col-span-1 flex items-end">
+              <div className="w-full">
+                <label
+                  htmlFor="search"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Поиск
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="search"
+                    placeholder="Поиск заказов..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="sm:col-span-1 flex items-end">
+              <div className="w-full">
+                <label
+                  htmlFor="date-range"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Период
+                </label>
+                <CustomDateRangePicker
+                  value={dateRange}
+                  onChange={setDateRange}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="date-range" className="block text-sm font-medium text-gray-700 mb-1">
-                Период
-              </label>
-              <DateRangePicker value={dateRange} onChange={setDateRange} />
-            </div>
-
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="status"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Статус
               </label>
               <Select
                 id="status"
                 value={filters.status}
-                onValueChange={(value) => setFilters((prev) => ({ ...prev, status: value }))}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, status: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Все статусы" />
@@ -224,13 +289,18 @@ export default function OrderListPage() {
             </div>
 
             <div>
-              <label htmlFor="order-type" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="order-type"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Тип заказа
               </label>
               <Select
                 id="order-type"
                 value={filters.orderTypeId}
-                onValueChange={(value) => setFilters((prev) => ({ ...prev, orderTypeId: value }))}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, orderTypeId: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Все типы" />
@@ -247,13 +317,18 @@ export default function OrderListPage() {
             </div>
 
             <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="location"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Место проведения
               </label>
               <Select
                 id="location"
                 value={filters.offsite}
-                onValueChange={(value) => setFilters((prev) => ({ ...prev, offsite: value }))}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, offsite: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Все места" />
@@ -264,13 +339,6 @@ export default function OrderListPage() {
                   <SelectItem value="false">В ресторане</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="col-span-full flex justify-end">
-              <Button onClick={exportToExcel} className="bg-primary hover:bg-primary/90">
-                <Download className="mr-2 h-4 w-4" />
-                Экспорт в Excel
-              </Button>
             </div>
           </div>
 
@@ -283,13 +351,13 @@ export default function OrderListPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[60px]">ID</TableHead>
                     <TableHead>ФИО клиента</TableHead>
                     <TableHead
                       onClick={() =>
                         setFilters((prev) => ({
                           ...prev,
-                          order_direction: prev.order_direction === "DESC" ? "ASC" : "DESC",
+                          order_direction:
+                            prev.order_direction === "DESC" ? "ASC" : "DESC",
                         }))
                       }
                       className="cursor-pointer"
@@ -302,21 +370,17 @@ export default function OrderListPage() {
                     <TableHead>Телефон</TableHead>
                     <TableHead className="text-right">Цена</TableHead>
                     <TableHead className="text-right">Скидка</TableHead>
-                    <TableHead className="text-right">Итого</TableHead>
-                    <TableHead className="text-right">Полная сумма</TableHead>
-                    <TableHead>Статус оплаты</TableHead>
+                    <TableHead className="text-right">Сумма оплаты</TableHead>
                     <TableHead>Статус</TableHead>
-                    <TableHead>Примечание</TableHead>
-                    <TableHead>Комментарий</TableHead>
-                    <TableHead>Обновлено</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {orders.map((order) => (
                     <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.id}</TableCell>
                       <TableCell>{order.fullName}</TableCell>
-                      <TableCell>{format(parseISO(order.date), "dd.MM.yyyy")}</TableCell>
+                      <TableCell>
+                        {format(parseISO(order.date), "dd.MM.yyyy")}
+                      </TableCell>
                       <TableCell>{order.orderTypeName}</TableCell>
                       <TableCell>
                         <div className="flex items-center">
@@ -336,67 +400,39 @@ export default function OrderListPage() {
                           {order.phonenumber}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right">{order.price} TMT</TableCell>
-                      <TableCell className="text-right">{order.discount}%</TableCell>
-                      <TableCell className="text-right font-bold">{order.totalPayment} TMT</TableCell>
-                      <TableCell className="text-right font-bold">
-                        {(order.price * order.chairCount).toFixed(2)} TMT
+                      <TableCell className="text-right">
+                        {order.price}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-right">
+                        {order.discount}%
+                      </TableCell>
+                      <TableCell className="text-right">
                         {(() => {
-                          const totalCost = order.price * order.chairCount
-                          const discountAmount = totalCost * (order.discount / 100)
-                          const finalCost = totalCost - discountAmount
-                          const remainingPayment = Math.max(0, finalCost - order.totalPayment)
+                          const totalCost = order.price * order.chairCount;
+                          const discountAmount =
+                            totalCost * (order.discount / 100);
+                          const finalCost = totalCost - discountAmount;
+                          const remainingPayment = Math.max(
+                            0,
+                            finalCost - order.totalPayment
+                          );
                           return remainingPayment > 0 ? (
-                            <span className="text-amber-600">Осталось оплатить: {remainingPayment.toFixed(2)} TMT</span>
+                            <span className="text-amber-600">
+                              {remainingPayment.toFixed(2)}
+                            </span>
                           ) : (
-                            <span className="text-green-600">Оплачено</span>
-                          )
+                            <span className="text-green-600">0</span>
+                          );
                         })()}
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${getStatusColor(order.status)} text-white`}>
+                        <Badge
+                          className={`${getStatusColor(
+                            order.status
+                          )} text-white transition-colors duration-200`}
+                        >
                           {getStatusText(order.status)}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="truncate max-w-[150px]">
-                                <MessageSquare className="inline mr-1 h-3 w-3 text-blue-400" />
-                                {order.note || "Нет"}
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{order.note || "Примечание отсутствует"}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableCell>
-                      <TableCell>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="truncate max-w-[150px]">
-                                <MessageSquare className="inline mr-1 h-3 w-3 text-indigo-400" />
-                                {order.comment || "Нет"}
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{order.comment || "Комментарий отсутствует"}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <User className="mr-1 h-3 w-3 text-primary" />
-                          <span className="truncate max-w-[100px]">
-                            {order.updatedBy.firstName} {order.updatedBy.lastName}
-                          </span>
-                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -407,6 +443,5 @@ export default function OrderListPage() {
         </CardContent>
       </Card>
     </RestaurantLayout>
-  )
+  );
 }
-

@@ -1,124 +1,170 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { RestaurantLayout } from "@/components/restaurant-layout"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { orderTypeApi } from "@/lib/api"
-import type { OrderType, PaginationParams } from "@/types/api"
-import { ChevronDown, ChevronUp, Search, Plus, MoreHorizontal, Loader2 } from "lucide-react"
-import { Switch } from "@/components/ui/switch"
-import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "@/contexts/AuthContext"
-import { CreateOrderTypeForm } from "@/components/create-order-type-form"
-import { EditOrderTypeForm } from "@/components/edit-order-type-form"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react";
+import { RestaurantLayout } from "@/components/restaurant-layout";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { orderTypeApi } from "@/lib/api";
+import type { OrderType, PaginationParams } from "@/types/api";
+import {
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Plus,
+  MoreHorizontal,
+  Loader2,
+} from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { CreateOrderTypeForm } from "@/components/create-order-type-form";
+import { EditOrderTypeForm } from "@/components/edit-order-type-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 export default function OrderTypesPage() {
-  const { toast } = useToast()
-  const { user, selectedRestaurant } = useAuth()
-  const [orderTypes, setOrderTypes] = useState<OrderType[]>([])
+  const { toast } = useToast();
+  const { user, selectedRestaurant } = useAuth();
+  const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
   const [params, setParams] = useState<PaginationParams>({
     limit: 20,
     page: 1,
     order_direction: "DESC",
     order_by: "id",
-  })
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
-  const [editingOrderType, setEditingOrderType] = useState<OrderType | null>(null)
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
+  const [editingOrderType, setEditingOrderType] = useState<OrderType | null>(
+    null
+  );
 
   const fetchOrderTypes = async () => {
-    if (!selectedRestaurant) return
-    setIsLoading(true)
+    if (!selectedRestaurant) return;
+    setIsLoading(true);
     try {
       const data = await orderTypeApi.getOrderTypes({
         ...params,
         search: searchQuery || undefined,
         restaurantId: selectedRestaurant.id,
-      })
-      setOrderTypes(data)
+      });
+      setOrderTypes(data);
     } catch (error) {
-      console.error("Failed to fetch order types:", error)
+      console.error("Failed to fetch order types:", error);
       toast({
         title: "Ошибка",
         description: "Не удалось загрузить типы заказов",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (selectedRestaurant) {
-      fetchOrderTypes()
+      fetchOrderTypes();
     }
-  }, [params, searchQuery, selectedRestaurant])
+  }, [params, searchQuery, selectedRestaurant]);
 
   const handleSort = (column: string) => {
     setParams((prev) => ({
       ...prev,
       order_by: column,
-      order_direction: prev.order_by === column && prev.order_direction === "DESC" ? "ASC" : "DESC",
-    }))
-  }
+      order_direction:
+        prev.order_by === column && prev.order_direction === "DESC"
+          ? "ASC"
+          : "DESC",
+    }));
+  };
 
   const handleStatusChange = async (id: number, isActive: boolean) => {
-    if (!selectedRestaurant) return
+    if (!selectedRestaurant) return;
     try {
-      await orderTypeApi.updateOrderType(id, { isActive, restaurantId: selectedRestaurant.id })
-      setOrderTypes(orderTypes.map((type) => (type.id === id ? { ...type, isActive } : type)))
+      await orderTypeApi.updateOrderType(id, {
+        isActive,
+        restaurantId: selectedRestaurant.id,
+      });
+      setOrderTypes(
+        orderTypes.map((type) =>
+          type.id === id ? { ...type, isActive } : type
+        )
+      );
       toast({
         title: "Успех",
         description: "Статус типа заказа обновлен",
-      })
+      });
     } catch (error) {
       toast({
         title: "Ошибка",
         description: "Не удалось обновить статус",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleCreateSuccess = () => {
-    setIsCreateDrawerOpen(false)
-    fetchOrderTypes()
-  }
+    setIsCreateDrawerOpen(false);
+    fetchOrderTypes();
+  };
 
   const handleEditSuccess = () => {
-    setEditingOrderType(null)
-    fetchOrderTypes()
-  }
+    setEditingOrderType(null);
+    fetchOrderTypes();
+  };
 
   const SortIcon = ({ column }: { column: string }) => {
-    if (params.order_by !== column) return null
-    return params.order_direction === "DESC" ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
-  }
+    if (params.order_by !== column) return null;
+    return params.order_direction === "DESC" ? (
+      <ChevronDown className="w-4 h-4" />
+    ) : (
+      <ChevronUp className="w-4 h-4" />
+    );
+  };
 
   if (!user || !selectedRestaurant) {
-    return <div>Выберите ресторан</div>
+    return <div>Выберите ресторан</div>;
   }
 
   return (
     <RestaurantLayout>
       <Card className="mb-6 bg-gradient-to-b from-white to-gray-50">
         <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
-          <CardTitle className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Типы заказов</CardTitle>
-          <Button onClick={() => setIsCreateDrawerOpen(true)} className="bg-primary hover:bg-primary/90">
+          <CardTitle className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">
+            Типы заказов
+          </CardTitle>
+          <Button
+            onClick={() => setIsCreateDrawerOpen(true)}
+            className="bg-primary hover:bg-primary/90"
+          >
             <Plus className="mr-2 h-4 w-4" /> Добавить тип
           </Button>
         </CardHeader>
@@ -135,7 +181,9 @@ export default function OrderTypesPage() {
             </div>
             <Select
               value={String(params.limit)}
-              onValueChange={(value) => setParams((prev) => ({ ...prev, limit: Number(value) }))}
+              onValueChange={(value) =>
+                setParams((prev) => ({ ...prev, limit: Number(value) }))
+              }
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Строк на странице" />
@@ -143,7 +191,7 @@ export default function OrderTypesPage() {
               <SelectContent>
                 <SelectItem value="10">10 строк</SelectItem>
                 <SelectItem value="20">20 строк</SelectItem>
-                <SelectItem value="50">50 строк</SelectItem>
+                <SelectItem value="50">50 ст��ок</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -153,13 +201,19 @@ export default function OrderTypesPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-100">
-                    <TableHead onClick={() => handleSort("name")} className="cursor-pointer">
+                    <TableHead
+                      onClick={() => handleSort("name")}
+                      className="cursor-pointer"
+                    >
                       <div className="flex items-center">
                         Название
                         <SortIcon column="name" />
                       </div>
                     </TableHead>
-                    <TableHead onClick={() => handleSort("price")} className="cursor-pointer">
+                    <TableHead
+                      onClick={() => handleSort("price")}
+                      className="cursor-pointer"
+                    >
                       <div className="flex items-center">
                         Цена
                         <SortIcon column="price" />
@@ -185,16 +239,24 @@ export default function OrderTypesPage() {
                   ) : (
                     orderTypes.map((type) => (
                       <TableRow key={type.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">{type.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {type.name}
+                        </TableCell>
                         <TableCell>{type.price}</TableCell>
                         <TableCell>
                           <div className="flex items-center">
                             <Switch
                               checked={type.isActive}
-                              onCheckedChange={(checked) => handleStatusChange(type.id, checked)}
+                              onCheckedChange={(checked) =>
+                                handleStatusChange(type.id, checked)
+                              }
                               className="mr-2"
                             />
-                            <Badge className={type.isActive ? "bg-green-500" : "bg-red-500"}>
+                            <Badge
+                              className={
+                                type.isActive ? "bg-green-500" : "bg-red-500"
+                              }
+                            >
                               {type.isActive ? "Активный" : "Неактивный"}
                             </Badge>
                           </div>
@@ -209,7 +271,9 @@ export default function OrderTypesPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Действия</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => setEditingOrderType(type)}>
+                              <DropdownMenuItem
+                                onClick={() => setEditingOrderType(type)}
+                              >
                                 Редактировать
                               </DropdownMenuItem>
                               {/* Add more actions as needed */}
@@ -228,12 +292,20 @@ export default function OrderTypesPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setParams((prev) => ({ ...prev, page: prev.page - 1 }))}
+              onClick={() =>
+                setParams((prev) => ({ ...prev, page: prev.page - 1 }))
+              }
               disabled={params.page === 1}
             >
               Предыдущая
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setParams((prev) => ({ ...prev, page: prev.page + 1 }))}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setParams((prev) => ({ ...prev, page: prev.page + 1 }))
+              }
+            >
               Следующая
             </Button>
           </div>
@@ -259,7 +331,10 @@ export default function OrderTypesPage() {
       </Sheet>
 
       {/* Edit Order Type Drawer */}
-      <Sheet open={editingOrderType !== null} onOpenChange={(open) => !open && setEditingOrderType(null)}>
+      <Sheet
+        open={editingOrderType !== null}
+        onOpenChange={(open) => !open && setEditingOrderType(null)}
+      >
         <SheetContent side="right" className="sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>Редактировать тип заказа</SheetTitle>
@@ -278,6 +353,5 @@ export default function OrderTypesPage() {
         </SheetContent>
       </Sheet>
     </RestaurantLayout>
-  )
+  );
 }
-

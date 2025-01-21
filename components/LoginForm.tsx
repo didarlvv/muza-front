@@ -20,8 +20,8 @@ import StorageService from "@/utils/storage";
 export default function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
-  const [username, setUsername] = useState("63744444");
-  const [password, setPassword] = useState("User@123");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

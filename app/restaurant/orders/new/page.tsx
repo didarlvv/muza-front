@@ -1,24 +1,37 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { RestaurantLayout } from "@/components/restaurant-layout"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { orderApi, orderTypeApi } from "@/lib/api"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "@/contexts/AuthContext"
-import type { OrderType } from "@/types/api"
-import { format } from "date-fns"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { RestaurantLayout } from "@/components/restaurant-layout";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { orderApi, orderTypeApi } from "@/lib/api";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import type { OrderType } from "@/types/api";
+import { format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Имя должно содержать минимум 2 символа"),
@@ -32,15 +45,14 @@ const formSchema = z.object({
   discount: z.number().min(0).max(100),
   offsite: z.boolean().default(false),
   totalPayment: z.number().min(0),
-  price: z.number().min(0),
-})
+});
 
 export default function NewOrderPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const { selectedRestaurant } = useAuth()
-  const [orderTypes, setOrderTypes] = useState<OrderType[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const { toast } = useToast();
+  const { selectedRestaurant } = useAuth();
+  const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,38 +68,30 @@ export default function NewOrderPage() {
       discount: 0,
       offsite: false,
       totalPayment: 0,
-      price: 0,
     },
-  })
-
-  const watchPrice = form.watch("price")
-  const watchDiscount = form.watch("discount")
-
-  useEffect(() => {
-    const totalPayment = watchPrice - (watchPrice * watchDiscount) / 100
-    form.setValue("totalPayment", totalPayment)
-  }, [watchPrice, watchDiscount, form])
+  });
 
   useEffect(() => {
     const fetchOrderTypes = async () => {
-      if (!selectedRestaurant) return
+      if (!selectedRestaurant) return;
       try {
         const data = await orderTypeApi.getOrderTypes({
           restaurantId: selectedRestaurant.id,
-        })
-        setOrderTypes(data)
+          isActive: true, // Add this line to fetch only active order types
+        });
+        setOrderTypes(data);
       } catch (error) {
-        console.error("Failed to fetch order types:", error)
+        console.error("Failed to fetch order types:", error);
         toast({
           title: "Ошибка",
           description: "Не удалось загрузить типы заказов",
           variant: "destructive",
-        })
+        });
       }
-    }
+    };
 
-    fetchOrderTypes()
-  }, [selectedRestaurant, toast])
+    fetchOrderTypes();
+  }, [selectedRestaurant, toast]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!selectedRestaurant) {
@@ -95,43 +99,43 @@ export default function NewOrderPage() {
         title: "Ошибка",
         description: "Выберите ресторан",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     try {
-      setIsLoading(true)
-      // Omit restaurantId from the request body
-      const { totalPayment, ...submitData } = values
-      await orderApi.createOrder(submitData)
+      setIsLoading(true);
+      await orderApi.createOrder(values);
 
       toast({
         title: "Успех",
         description: "Заказ успешно создан",
-      })
+      });
 
-      router.push("/restaurant/orders")
+      router.push("/restaurant/orders");
     } catch (error) {
-      console.error("Failed to create order:", error)
+      console.error("Failed to create order:", error);
       toast({
         title: "Ошибка",
         description: "Не удалось создать заказ",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (!selectedRestaurant) {
-    return <div>Пожалуйста, выберите ресторан</div>
+    return <div>Пожалуйста, выберите ресторан</div>;
   }
 
   return (
     <RestaurantLayout>
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Новый заказ</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Новый заказ
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -144,7 +148,11 @@ export default function NewOrderPage() {
                     <FormItem>
                       <FormLabel>ФИО клиента</FormLabel>
                       <FormControl>
-                        <Input {...field} disabled={isLoading} className="bg-white" />
+                        <Input
+                          {...field}
+                          disabled={isLoading}
+                          className="bg-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -158,7 +166,11 @@ export default function NewOrderPage() {
                     <FormItem>
                       <FormLabel>Номер телефона</FormLabel>
                       <FormControl>
-                        <Input {...field} disabled={isLoading} className="bg-white" />
+                        <Input
+                          {...field}
+                          disabled={isLoading}
+                          className="bg-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -171,7 +183,11 @@ export default function NewOrderPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Тип заказа</FormLabel>
-                      <Select disabled={isLoading} onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        disabled={isLoading}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Выберите тип заказа" />
@@ -179,7 +195,10 @@ export default function NewOrderPage() {
                         </FormControl>
                         <SelectContent>
                           {orderTypes.map((type) => (
-                            <SelectItem key={type.id} value={type.id.toString()}>
+                            <SelectItem
+                              key={type.id}
+                              value={type.id.toString()}
+                            >
                               {type.name}
                             </SelectItem>
                           ))}
@@ -197,7 +216,12 @@ export default function NewOrderPage() {
                     <FormItem>
                       <FormLabel>Дата</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} disabled={isLoading} className="bg-white" />
+                        <Input
+                          type="date"
+                          {...field}
+                          disabled={isLoading}
+                          className="bg-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -214,27 +238,9 @@ export default function NewOrderPage() {
                         <Input
                           type="number"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                          disabled={isLoading}
-                          className="bg-white"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Цена</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                           disabled={isLoading}
                           className="bg-white"
                         />
@@ -254,7 +260,9 @@ export default function NewOrderPage() {
                         <Input
                           type="number"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                           disabled={isLoading}
                           className="bg-white"
                         />
@@ -269,9 +277,17 @@ export default function NewOrderPage() {
                   name="totalPayment"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Итоговая сумма</FormLabel>
+                      <FormLabel>Сумма оплаты</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} disabled={true} className="bg-gray-100" />
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                          disabled={isLoading}
+                          className="bg-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -284,7 +300,11 @@ export default function NewOrderPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Статус</FormLabel>
-                      <Select disabled={isLoading} onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        disabled={isLoading}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Выберите статус" />
@@ -308,10 +328,16 @@ export default function NewOrderPage() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base">Выездное мероприятие</FormLabel>
+                      <FormLabel className="text-base">
+                        Выездное мероприятие
+                      </FormLabel>
                     </div>
                     <FormControl>
-                      <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isLoading} />
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isLoading}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -324,7 +350,11 @@ export default function NewOrderPage() {
                   <FormItem>
                     <FormLabel>Примечание</FormLabel>
                     <FormControl>
-                      <Textarea {...field} disabled={isLoading} className="min-h-[100px] bg-white" />
+                      <Textarea
+                        {...field}
+                        disabled={isLoading}
+                        className="min-h-[100px] bg-white"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -338,7 +368,11 @@ export default function NewOrderPage() {
                   <FormItem>
                     <FormLabel>Комментарий</FormLabel>
                     <FormControl>
-                      <Textarea {...field} disabled={isLoading} className="min-h-[100px] bg-white" />
+                      <Textarea
+                        {...field}
+                        disabled={isLoading}
+                        className="min-h-[100px] bg-white"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -346,10 +380,19 @@ export default function NewOrderPage() {
               />
 
               <div className="flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  disabled={isLoading}
+                >
                   Отмена
                 </Button>
-                <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-primary hover:bg-primary/90"
+                >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -365,6 +408,5 @@ export default function NewOrderPage() {
         </CardContent>
       </Card>
     </RestaurantLayout>
-  )
+  );
 }
-

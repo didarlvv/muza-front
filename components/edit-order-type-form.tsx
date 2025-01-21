@@ -1,30 +1,37 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { orderTypeApi } from "@/lib/api"
-import { useToast } from "@/components/ui/use-toast"
-import { Loader2 } from "lucide-react"
-import type { OrderType } from "@/types/api"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { orderTypeApi } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
+import type { OrderType } from "@/types/api";
 
 const formSchema = z.object({
   name: z.string().min(2, "Название должно быть не менее 2 символов"),
   price: z.number().min(0, "Цена не может быть отрицательной"),
   isActive: z.boolean(),
-})
+});
 
 interface EditOrderTypeFormProps {
-  orderTypeId: number
-  initialData: OrderType
-  restaurantId: number
-  onSuccess: () => void
-  onCancel: () => void
+  orderTypeId: number;
+  initialData: OrderType;
+  restaurantId: number;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
 export function EditOrderTypeForm({
@@ -34,8 +41,8 @@ export function EditOrderTypeForm({
   onSuccess,
   onCancel,
 }: EditOrderTypeFormProps) {
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,51 +51,51 @@ export function EditOrderTypeForm({
       price: initialData.price,
       isActive: initialData.isActive,
     },
-  })
+  });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const changedFields = Object.entries(values).reduce(
-      (acc, [key, value]) => {
-        if (JSON.stringify(initialData[key as keyof OrderType]) !== JSON.stringify(value)) {
-          acc[key] = value
-        }
-        return acc
-      },
-      {} as Partial<z.infer<typeof formSchema>>,
-    )
+    const changedFields = Object.entries(values).reduce((acc, [key, value]) => {
+      if (
+        JSON.stringify(initialData[key as keyof OrderType]) !==
+        JSON.stringify(value)
+      ) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Partial<z.infer<typeof formSchema>>);
 
     if (Object.keys(changedFields).length === 0) {
       toast({
         title: "Информация",
         description: "Нет изменений для сохранения",
-      })
-      return
+      });
+      return;
     }
 
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
       await orderTypeApi.updateOrderType(orderTypeId, {
         ...changedFields,
         restaurantId,
-      })
+      });
 
       toast({
         title: "Успех",
         description: "Тип заказа успешно обновлен",
-      })
+      });
 
-      onSuccess()
+      onSuccess();
     } catch (error) {
       toast({
         title: "Ошибка",
-        description: "Не удалось обновить тип заказа",
+        description: "Н�������� удалось обновить тип заказа",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -135,14 +142,23 @@ export function EditOrderTypeForm({
                 <FormLabel className="text-base">Активный</FormLabel>
               </div>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isLoading} />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isLoading}
+                />
               </FormControl>
             </FormItem>
           )}
         />
 
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
             Отмена
           </Button>
           <Button type="submit" disabled={isLoading}>
@@ -152,6 +168,5 @@ export function EditOrderTypeForm({
         </div>
       </form>
     </Form>
-  )
+  );
 }
-
