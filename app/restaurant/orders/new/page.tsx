@@ -77,7 +77,7 @@ export default function NewOrderPage() {
       try {
         const data = await orderTypeApi.getOrderTypes({
           restaurantId: selectedRestaurant.id,
-          isActive: true, // Add this line to fetch only active order types
+          isActive: true,
         });
         setOrderTypes(data);
       } catch (error) {
@@ -236,11 +236,19 @@ export default function NewOrderPage() {
                       <FormLabel>Количество гостей</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
+                          type="text"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onInput={(e) => {
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9]/g, "");
+                          }}
+                          onChange={(e) => {
+                            const value =
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value);
+                            field.onChange(value);
+                          }}
                           disabled={isLoading}
                           className="bg-white"
                         />
@@ -258,11 +266,19 @@ export default function NewOrderPage() {
                       <FormLabel>Скидка (%)</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
+                          type="text"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onInput={(e) => {
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9]/g, "");
+                          }}
+                          onChange={(e) => {
+                            const value =
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value);
+                            field.onChange(value);
+                          }}
                           disabled={isLoading}
                           className="bg-white"
                         />
@@ -280,11 +296,19 @@ export default function NewOrderPage() {
                       <FormLabel>Сумма оплаты</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
+                          type="text"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onInput={(e) => {
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9]/g, "");
+                          }}
+                          onChange={(e) => {
+                            const value =
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value);
+                            field.onChange(value);
+                          }}
                           disabled={isLoading}
                           className="bg-white"
                         />

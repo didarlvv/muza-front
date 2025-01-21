@@ -241,9 +241,19 @@ export function EditOrderForm({
                 <FormLabel>Количество гостей</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="text"
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onInput={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    }}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? "" : Number(e.target.value);
+                      field.onChange(value);
+                    }}
                     disabled={isLoading}
                   />
                 </FormControl>
@@ -260,9 +270,19 @@ export function EditOrderForm({
                 <FormLabel>Цена</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="text"
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onInput={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    }}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? "" : Number(e.target.value);
+                      field.onChange(value);
+                    }}
                     disabled={isLoading}
                   />
                 </FormControl>
@@ -279,9 +299,19 @@ export function EditOrderForm({
                 <FormLabel>Скидка (%)</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="text"
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onInput={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    }}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? "" : Number(e.target.value);
+                      field.onChange(value);
+                    }}
                     disabled={isLoading}
                   />
                 </FormControl>
@@ -298,9 +328,19 @@ export function EditOrderForm({
                 <FormLabel>Сумма оплаты</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="text"
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onInput={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    }}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? "" : Number(e.target.value);
+                      field.onChange(value);
+                    }}
                     disabled={isLoading}
                   />
                 </FormControl>
